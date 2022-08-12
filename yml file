@@ -1,0 +1,33 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: Sagar-Cluster
+  region: eu-west-2
+
+vpc:
+  id: vpc-03ce661f5888a27c7
+  cidr: "172.31.0.0/16"
+  subnets:
+    public:
+      public-one:
+        id: subnet-001cfa37b715aaf7c
+      public-two:
+        id: subnet-0a64f5a2a854748fe
+      public-three:
+        id: subnet-09b1296f8c517bcd8
+    
+
+nodeGroups:
+  - name: ng-1
+    instanceType: t2.medium
+    desiredCapacity: 2
+    subnets:
+      - public-one
+      - public-two
+  - name: ng-2
+    instanceType: t2.medium
+    desiredCapacity: 1
+    subnets:
+      - public-three
