@@ -1,0 +1,51 @@
+Create  EKS-Admin-policy policy: 
+in JSON  
+
+{
+ "Version": "2012-10-17",
+ "Statement": [
+ {
+ "Effect": "Allow",
+ "Action": [
+ "eks:*"
+ ],
+ "Resource": "*"
+ }
+ ]
+}
+
+create CloudFormation-Admin-policy:
+in JSON
+
+{
+ "Version": "2012-10-17",
+ "Statement": [
+ {
+ "Effect": "Allow",
+ "Action": [
+ "cloudformation:*"
+ ],
+ "Resource": "*"
+ }
+ ]
+}
+Create policy :ssm get parameter
+
+"Statement": [
+    {
+        "Effect": "Allow",
+        "Action":[
+            "ssm:DescribeParameters"
+        ],
+        "Resource": "*"
+    },
+    {
+        "Effect": "Allow",
+        "Action":[
+            "ssm:GetParameters",
+            "ssm:GetParameter",
+            "ssm:GetParametersByPath"
+        ],
+        "Resource": "arn:aws:ssm:ca-central-1::parameter/*"
+    }
+]
