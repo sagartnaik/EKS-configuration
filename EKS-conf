@@ -1,0 +1,179 @@
+AWS EKS Shared Cluster
+
+step1:
+Create ec2 role
+Create  EKS-Admin-policy policy: 
+in JSON  
+
+{
+ "Version": "2012-10-17",
+ "Statement": [
+ {
+ "Effect": "Allow",
+ "Action": [
+ "eks:*"
+ ],
+ "Resource": "*"
+ }
+ ]
+}
+
+create CloudFormation-Admin-policy:
+in JSON
+
+{
+ "Version": "2012-10-17",
+ "Statement": [
+ {
+ "Effect": "Allow",
+ "Action": [
+ "cloudformation:*"
+ ],
+ "Resource": "*"
+ }
+ ]
+}
+Create policy :ssm get parameter
+
+"Statement": [
+    {
+        "Effect": "Allow",
+        "Action":[
+            "ssm:DescribeParameters"
+        ],
+        "Resource": "*"
+    },
+    {
+        "Effect": "Allow",
+        "Action":[
+            "ssm:GetParameters",
+            "ssm:GetParameter",
+            "ssm:GetParametersByPath"
+        ],
+        "Resource": "arn:aws:ssm:ca-central-1::parameter/*"
+    }
+]
+
+
+
+finally, assign the following policies to your above role 
+
+1.AmazonEC2FullAccess
+2.IAMFullAccess
+3.AmazonVPCFullAccess
+4.CloudFormation-Admin-policy
+5.EKS-Admin-policy
+6.ssm full access policy 
+7.ssm get parameter 
+(where the last 3 policies are the ones you created above)
+Step2:
+  apt update 
+  apt upgrade
+ Install Python : apt install python3
+ install pythonpip: apt install python3-pip
+ pip install --user awscli
+ export PATH=$PATH:/home/$(whoami)/.local/bin
+Step 3 : 
+Create instance and attach role 
+Launch newly created instance 
+Step4: 
+Create .aws folder:
+ mkdir -p  ~/.aws
+cd  ~/.aws 
+create file credentials :
+ vi  credentials
+Add following lines to credentials file
+ [default]  
+ region=us-east-1  
+ output=json
+Step 5 : To install or upgrade eksctl on Linux
+curl --silent --location "<https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname> -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+  eksctl version
+Step 6: Install kubelet and kubectl
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet kubectl
+kubectl version 
+
+Step 7 : Create yaml file 
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: Sagar-Cluster
+  region: eu-west-2
+
+vpc:
+  id: vpc-03ce661f5888a27c7
+  cidr: "172.31.0.0/16"
+  subnets:
+    public:
+      public-one:
+        id: subnet-001cfa37b715aaf7c
+      public-two:
+        id: subnet-0a64f5a2a854748fe
+      public-three:
+        id: subnet-09b1296f8c517bcd8
+    
+
+nodeGroups:
+  - name: ng-1
+    instanceType: t2.medium
+    desiredCapacity: 2
+    subnets:
+      - public-one
+      - public-two
+  - name: ng-2
+    instanceType: t2.medium
+    desiredCapacity: 1
+    subnets:
+      - public-three
+Note : change name , subnet and vpc and instance type accordingly in yml file 
+
+Step 8 :
+eksctl create cluster -f  EKS_Cluster.yml (yamal file name )
+
+
+eksctl create cluster -f  EKS_Cluster.yml (yamal file name )
+Go to cloud formation service -stack -verify the resource creating 
+
+Go to Elastic kubernetes service verify cluster is created or not here 
+
+
+Go to terminal --once the EKS cluster is ready -execute below command 
+
+sudo apt-get install -y  kubectl=1.22.6-00
+ sudo apt-get install -y  kubectl=1.22.6-00 --allow-downgrades
+  
+
+curl -o aws-iam-authenticator https://s3.us-west-2.amazonaws.com/amazon-eks/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator
+
+chmod +x ./aws-iam-authenticator
+
+mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$PATH:$HOME/bin
+
+if the # kubectl get nodes throws the following error Unable to connect to the server: getting credentials: exec plugin is configured to use API version client.authentication.k8s.io/v1beta1, plugin returned version client.authentication.k8s.io/v1alpha1
+
+ check if the ~/.kube/config has v1beta1 in the APIVersion line as below API version client.authentication.k8s.io/v1beta1
+ then run the follwing command
+
+# aws eks update-kubeconfig --name satya-cluster-1
+	 this will update the config file wit
+
+kubectl get nodes
+  
+ (Go to ec2 service and verify 3 nodes will be created This will   be  based on desired capacity which you mentioned in node group)
+
+kubectl get pods  -A
+
+
+ 
+
+
+
+
